@@ -597,7 +597,8 @@ K or CTRL-]               Jump to the manpage for the <cWORD> under the
                           cursor. Takes a count for the section.
 CTRL-T                    Jump back to the location that the manpage was
                           opened from.
-gO                        Show the manpage outline. |gO|
+gF                        Show the manpage flags outline. |gF|
+gO                        Show the manpage section outline. |gO|
 q                         :quit if invoked as $MANPAGER, otherwise :close.
 
 Variables:

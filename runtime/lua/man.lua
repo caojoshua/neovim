@@ -138,7 +138,7 @@ local function highlight_line(line, linenr)
   for _, hl in ipairs(hls) do
     if hl.attr ~= NONE then
       buf_hls[#buf_hls + 1] = {
-        0,
+        vim.api.nvim_get_current_buf(),
         -1,
         hl_groups[hl.attr],
         linenr - 1,

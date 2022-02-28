@@ -159,29 +159,67 @@ function! s:put_page(page) abort
   call s:set_options(v:false)
 endfunction
 
-function! man#show_toc() abort
-  let bufname = bufname('%')
-  let info = getloclist(0, {'winid': 1})
-  if !empty(info) && getwinvar(info.winid, 'qf_toc') ==# bufname
-    lopen
-    return
-  endif
-
-  let toc = []
+function! s:get_filtered_list(filter) abort
+  let list = []
   let lnum = 2
   let last_line = line('$') - 1
   while lnum && lnum < last_line
     let text = getline(lnum)
-    if text =~# '^\%( \{3\}\)\=\S.*$'
-      call add(toc, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
+    if text =~# a:filter
+      " strip out whitespace
+      let text = substitute(text, '^\s*\(.\{-}\)\s*$', '\1', '')
+      call add(list, {'bufnr': bufnr('%'), 'lnum': lnum, 'text': text})
     endif
     let lnum = nextnonblank(lnum + 1)
   endwhile
+  return list
+endfunction
 
-  call setloclist(0, toc, ' ')
-  call setloclist(0, [], 'a', {'title': 'Man TOC'})
+function! s:add_to_loclist(qf_id, filter) abort
+  let bufname = bufname('%')
+  let id = bufname .. '-' .. a:qf_id
+  let info = getloclist(0, {'winid': 1})
+  if !empty(info) && getwinvar(info.winid, 'qf_man') ==# id
+    lopen
+    return
+  endif
+
+  let list = s:get_filtered_list(a:filter)
+  call setloclist(0, list, ' ')
+  call setloclist(0, [], 'a', {'title': 'Man ' .. a:qf_id})
   lopen
-  let w:qf_toc = bufname
+  let w:qf_man = id
+endfunction
+
+function! man#show_toc() abort
+  call s:add_to_loclist('section TOC', '^\%( \{3\}\)\=\S.*$')
+endfunction
+
+function! man#show_flags() abort
+  call s:add_to_loclist('flag TOC', '^\s\+\%(+\|-\)\S\+')
+endfunction
+
+function! man#goto_flag(query) abort
+  let list = s:get_filtered_list('^\( \{7\}\)' .. a:query .. '\s.*')
+  if len(list) == 0
+    echo 'flag `' .. a:query '` does not exist'
+    return
+  else
+    call cursor(list[0]['lnum'], 0)
+    execute 'normal! ^'
+  endif
+endfunction
+
+function! man#search_flags(query) abort
+  if len(a:query) == 0
+    return
+  elseif a:query[0] == '-'
+    call s:add_to_loclist('flags', '^\s\+\%(' . a:query . '\|-.\{-}' . a:query . '\)')
+  else
+    " if `-` is not the first character in the query, we need to added it to
+    " the regex
+    call s:add_to_loclist('flags', '^\s\+-.\{-}' . a:query)
+  endif
 endfunction
 
 " attempt to extract the name and sect out of 'name(sect)'

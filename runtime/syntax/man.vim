@@ -1,7 +1,8 @@
 " Maintainer:          Anmol Sethi <hi@nhooyr.io>
 " Previous Maintainer: SungHyun Nam <goweol@gmail.com>
-
-if exists('b:current_syntax')
+"
+if exists('b:current_syntax') || &filetype != 'man'
+  " May have been included by some other filetype.
   finish
 endif
 
@@ -10,7 +11,7 @@ syntax match manReference      display '[^()[:space:]]\+(\%([0-9][a-z]*\|[nlpox]
 syntax match manSectionHeading display '^\S.*$'
 syntax match manHeader         display '^\%1l.*$'
 syntax match manSubHeading     display '^ \{3\}\S.*$'
-syntax match manOptionDesc     display '^\s\+\%(+\|-\)\S\+'
+syntax match manOptionDesc     display '^\s\+\(\%(+\|-\)\S\+,\s\+\)*\%(+\|-\)\S\+'
 
 highlight default link manHeader         Title
 highlight default link manSectionHeading Statement
@@ -21,11 +22,6 @@ highlight default link manSubHeading     Function
 highlight default manUnderline cterm=underline gui=underline
 highlight default manBold      cterm=bold      gui=bold
 highlight default manItalic    cterm=italic    gui=italic
-
-if &filetype != 'man'
-  " May have been included by some other filetype.
-  finish
-endif
 
 if get(b:, 'man_sect', '') =~# '^[023]'
   syntax case match

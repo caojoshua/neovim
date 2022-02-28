@@ -22,6 +22,9 @@ setlocal tagfunc=man#goto_tag
 if !exists('g:no_plugin_maps') && !exists('g:no_man_maps')
   nnoremap <silent> <buffer> j             gj
   nnoremap <silent> <buffer> k             gk
+  nnoremap <buffer> gf                     :call man#goto_flag('')<Left><Left>
+  nnoremap <buffer> go                     :call man#search_flags('')<Left><Left>
+  nnoremap <silent> <buffer> gF            :call man#show_flags()<CR>
   nnoremap <silent> <buffer> gO            :call man#show_toc()<CR>
   nnoremap <silent> <buffer> <2-LeftMouse> :Man<CR>
   nnoremap <silent> <buffer> <nowait> q :lclose<CR><C-W>c
